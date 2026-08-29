@@ -1,40 +1,31 @@
 <script setup lang="ts">
-import { useUserStore } from '@/store/user.store';
+import { useThemeStore } from '@/store/theme.store';
 import { initFlowbite } from 'flowbite';
 import { onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { loadLocaleMessages } from './i18n';
 import { RouterView } from 'vue-router';
+import { loadLocaleMessages } from './i18n';
 
 const { locale } = useI18n()
-const userStore = useUserStore()
+const themeStore = useThemeStore()
 
 onMounted(async () => {
     initFlowbite();
+
+    // Initialize theme (reads localStorage, applies dark/light class to <html>)
+    themeStore.init()
 
     const language = localStorage.getItem('locale')
     if (language) {
         await loadLocaleMessages(language)
         locale.value = language
         document.documentElement.lang = language
-    }else {
+    } else {
         await loadLocaleMessages('en-US')
         locale.value = 'en-US'
         document.documentElement.lang = 'en-US'
     }
 
-    /** Mock User Store */
-
-    userStore.setUser({
-        first_name: "John",
-        last_name: "Doe",
-        telegram_id: 123456789,
-        is_bot: false,
-        is_active: true,
-        id: "123",
-        role: "manager",
-        username: "JohnDoe"
-    })
 })
 
 </script>

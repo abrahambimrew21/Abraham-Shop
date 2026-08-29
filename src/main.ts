@@ -8,10 +8,41 @@ import { router } from './router';
 import { createPinia } from 'pinia'
 import { PiniaColada } from '@pinia/colada';
 import VueApexCharts from "vue3-apexcharts";
-import { MdHomeRound, MdAddRound, MdSettingsRound, MdWarehouseRound, MdShop2Round, MdPaletteRound, MdLanguageRound, MdPersonRound, BiClipboardData, MdHistoryRound, MdEditRound, MdDeleteRound, MdShoppingcartRound, MdReceiptlongRound} from "oh-vue-icons/icons";
+import {
+    MdHomeRound,
+    MdAddRound,
+    MdSettingsRound,
+    MdWarehouseRound,
+    MdShop2Round,
+    MdPaletteRound,
+    MdLanguageRound,
+    MdPersonRound,
+    BiClipboardData,
+    MdHistoryRound,
+    MdEditRound,
+    MdDeleteRound,
+    MdShoppingcartRound,
+    MdReceiptlongRound,
+    MdAnalyticsRound,
+} from "oh-vue-icons/icons";
 
-
-addIcons(MdHomeRound, MdAddRound, MdSettingsRound, MdWarehouseRound, MdShop2Round, MdPaletteRound, MdLanguageRound, MdPersonRound, BiClipboardData, MdHistoryRound, MdEditRound, MdDeleteRound, MdShoppingcartRound, MdReceiptlongRound);
+addIcons(
+    MdHomeRound,
+    MdAddRound,
+    MdSettingsRound,
+    MdWarehouseRound,
+    MdShop2Round,
+    MdPaletteRound,
+    MdLanguageRound,
+    MdPersonRound,
+    BiClipboardData,
+    MdHistoryRound,
+    MdEditRound,
+    MdDeleteRound,
+    MdShoppingcartRound,
+    MdReceiptlongRound,
+    MdAnalyticsRound,
+);
 
 const pinia = createPinia()
 const app = createApp(App)
@@ -19,13 +50,10 @@ const app = createApp(App)
 app.use(pinia);
 app.use(i18n);
 app.use(PiniaColada, {
-  queryOptions: {
-    // Data stays fresh for 5 minutes
-    staleTime: 1000 * 60 * 5,
-  },
-  mutationOptions: {
-    // Global mutation options
-  },
+    queryOptions: {
+        staleTime: 1000 * 60 * 5,
+    },
+    mutationOptions: {},
 })
 app.use(router);
 app.use(VueApexCharts);

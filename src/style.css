@@ -45,3 +45,7 @@ button {
   scrollbar-width: thin;
 	scrollbar-color: var(--color-primary-700) transparent;
 }
+
+.overflow-x-auto {
+  max-width: 100%;
+}

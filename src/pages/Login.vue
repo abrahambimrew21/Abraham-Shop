@@ -2,9 +2,10 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store/user.store';
+import { useI18n } from 'vue-i18n';
 import { db, seedDatabase } from '@/database';
-import type { UserType } from '@/types/user.type';
 
+const { t } = useI18n();
 const router = useRouter();
 const userStore = useUserStore();
 
@@ -49,11 +50,6 @@ const removeDigit = () => {
     }
 };
 
-const clearPin = () => {
-    pin.value = '';
-    errorMessage.value = '';
-};
-
 const submitPin = async () => {
     if (pin.value.length !== 6 || isLoading.value) return;
 
@@ -69,10 +65,10 @@ const submitPin = async () => {
             userStore.setUser(matchedUser);
             router.push('/');
         } else {
-            triggerError('Invalid PIN. Please try again.');
+            triggerError(t('login.invalid_pin'));
         }
     } catch (e) {
-        triggerError('An error occurred during authentication.');
+        triggerError(t('login.auth_error'));
     } finally {
         isLoading.value = false;
     }
@@ -92,8 +88,8 @@ const triggerError = (msg: string) => {
     <div class="min-h-[80vh] flex flex-col items-center justify-center px-4 py-8">
         <div class="w-full max-w-sm flex flex-col items-center gap-6 bg-neutral-primary-soft p-8 rounded-base border border-default shadow-xs">
             <div class="text-center">
-                <h2 class="text-2xl font-bold text-heading mb-1">Enter PIN</h2>
-                <p class="text-sm text-body">Please enter your 6-digit PIN to authenticate</p>
+                <h2 class="text-2xl font-bold text-heading mb-1">{{ t('login.title') }}</h2>
+                <p class="text-sm text-body">{{ t('login.subtitle') }}</p>
             </div>
 
             <!-- PIN Display Indicator Dots -->
@@ -112,47 +108,13 @@ const triggerError = (msg: string) => {
             </div>
             <div v-else class="h-4"></div>
 
-            <!-- Square Keypad Buttons -->
+            <!-- Keypad -->
             <div class="grid grid-cols-3 gap-3 w-full justify-items-center">
-                <button type="button" @click="appendDigit('1')"
+                <button v-for="digit in ['1','2','3','4','5','6','7','8','9']" :key="digit"
+                    type="button" @click="appendDigit(digit)"
                     class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-base border border-default text-xl font-bold text-heading bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium active:scale-95 transition-all shadow-xs focus:outline-none">
-                    1
+                    {{ digit }}
                 </button>
-                <button type="button" @click="appendDigit('2')"
-                    class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-base border border-default text-xl font-bold text-heading bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium active:scale-95 transition-all shadow-xs focus:outline-none">
-                    2
-                </button>
-                <button type="button" @click="appendDigit('3')"
-                    class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-base border border-default text-xl font-bold text-heading bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium active:scale-95 transition-all shadow-xs focus:outline-none">
-                    3
-                </button>
-
-                <button type="button" @click="appendDigit('4')"
-                    class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-base border border-default text-xl font-bold text-heading bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium active:scale-95 transition-all shadow-xs focus:outline-none">
-                    4
-                </button>
-                <button type="button" @click="appendDigit('5')"
-                    class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-base border border-default text-xl font-bold text-heading bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium active:scale-95 transition-all shadow-xs focus:outline-none">
-                    5
-                </button>
-                <button type="button" @click="appendDigit('6')"
-                    class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-base border border-default text-xl font-bold text-heading bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium active:scale-95 transition-all shadow-xs focus:outline-none">
-                    6
-                </button>
-
-                <button type="button" @click="appendDigit('7')"
-                    class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-base border border-default text-xl font-bold text-heading bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium active:scale-95 transition-all shadow-xs focus:outline-none">
-                    7
-                </button>
-                <button type="button" @click="appendDigit('8')"
-                    class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-base border border-default text-xl font-bold text-heading bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium active:scale-95 transition-all shadow-xs focus:outline-none">
-                    8
-                </button>
-                <button type="button" @click="appendDigit('9')"
-                    class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-base border border-default text-xl font-bold text-heading bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium active:scale-95 transition-all shadow-xs focus:outline-none">
-                    9
-                </button>
-
                 <button type="button" @click="removeDigit"
                     class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-base border border-default text-lg font-medium text-body bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium active:scale-95 transition-all shadow-xs focus:outline-none">
                     ⌫

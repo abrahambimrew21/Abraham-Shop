@@ -135,7 +135,7 @@ export function useDatePicker(options: DatePickerOptions = {}): UseDatePickerRet
             weekdayLang,
             useGeez,
             weekStart,
-        }) as MonthGridLike;
+        }) as unknown as MonthGridLike;
         instance.value = next;
         grid.value = next.generate();
     };
