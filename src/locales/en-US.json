@@ -1,0 +1,8 @@
+{
+    "app_name": "Mahibere Selassie",
+    "_system": {
+        "not_found": "404: Page not found",
+        "unauthorized": "401: Unauthorized",
+        "internal_server_error": "500: Internal server error"
+    }
+}

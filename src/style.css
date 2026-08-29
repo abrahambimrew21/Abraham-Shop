@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@import "flowbite/src/themes/default";
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite";
+
+
+@theme inline {
+  --color-primary-50:  #fbf8f1;
+  --color-primary-100: #f5efdf;
+  --color-primary-200: #e9dcbf;
+  --color-primary-300: #dbc396;
+  --color-primary-400: #caa165;
+  --color-primary-500: #c18e4e;
+  --color-primary-600: #b37943;
+  --color-primary-700: #956139;
+  --color-primary-800: #794f33;
+  --color-primary-900: #62422c;
+  --color-primary-950: #342116;
+  
+  --color-fg-brand-subtle: var(--color-primary-200);
+  --color-fg-brand: var(--color-primary-700);
+  --color-fg-brand-strong: var(--color-primary-900);
+
+  --color-brand-softer: var(--color-primary-50);
+  --color-brand-soft: var(--color-primary-100);
+  --color-brand: var(--color-primary-700);
+  --color-brand-medium: var(--color-primary-200);
+  --color-brand-strong: var(--color-primary-800);
+
+  --color-dark-fg-brand: var(--color-primary-300);
+  --color-dark-brand: var(--color-primary-500);
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+body, .default {
+  @apply bg-primary-50 text-gray-950 dark:bg-gray-950 dark:text-gray-50 transition-colors duration-300 ease-in-out;
+}
+
+button {
+  @apply cursor-pointer focus:ring-2;
+}
+
+* {
+  scrollbar-width: thin;
+	scrollbar-color: var(--color-primary-700) transparent;
+}
