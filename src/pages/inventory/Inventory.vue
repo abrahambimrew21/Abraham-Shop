@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { useI18n } from 'vue-i18n';
-import { initModals, initTooltips } from 'flowbite';
-import type { Item } from '@/types/items.type';
-import type { Inventory, Restock } from '@/types/inventory.type';
+import KenatDateSelector from '@/components/KenatDateSelector.vue';
 import { db, seedDatabase, toRawPlain } from '@/database';
+import type { Inventory, Restock } from '@/types/inventory.type';
+import type { Item } from '@/types/items.type';
+import { initModals, initTooltips } from 'flowbite';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -216,7 +217,7 @@ watch(selectedItemForAdd, (newItem) => {
     <div class="flex flex-col gap-2 w-full items-center pb-20">
         <h2 class="text-xl font-medium text-primary-900 dark:text-primary-500">{{ t('inventory.title') }}</h2>
 
-        <div class="p-4">
+        <div class="p-4 flex gap-4">
             <label for="input-group-1" class="sr-only">{{ t('common.search') }}</label>
             <div class="relative">
                 <div class="absolute inset-y-0 inset-s-0 flex items-center ps-3 pointer-events-none">
@@ -228,6 +229,8 @@ watch(selectedItemForAdd, (newItem) => {
                     class="block max-w-96 ps-9 pe-3  bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-3 py-2.5 shadow-xs placeholder:text-body"
                     :placeholder="t('inventory.search_placeholder')">
             </div>
+
+            <KenatDateSelector v-on:selected-date=""/>
         </div>
 
         <div class="flex items-center justify-center w-full mb-4">

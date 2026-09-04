@@ -1,6 +1,8 @@
 import { computed, ref, shallowRef, watch, type Ref } from 'vue';
 import Kenat, { MonthGrid } from 'kenat';
 
+export type CalendarMode = "month" | "year" | "decade";
+
 export interface EthiopianDate {
     year: number;
     month: number;
@@ -189,7 +191,7 @@ export function useDatePicker(options: DatePickerOptions = {}): UseDatePickerRet
 
     const formatDate = (date?: EthiopianDate | null): string => {
         if (!date) return '';
-        return `${date.year}/${String(date.month).padStart(2, '0')}/${String(date.day).padStart(2, '0')}`;
+        return `${String(date.day).padStart(2, '0')}/${String(date.month).padStart(2, '0')}/${date.year} E.C`;
     };
 
     const todayEth = (): EthiopianDate => {
