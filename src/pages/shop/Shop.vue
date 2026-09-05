@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { initModals, initTooltips } from 'flowbite';
@@ -17,7 +17,6 @@ const searchQuery = ref('');
 const selectedInventoryItem = ref<Inventory | null>(null);
 
 const selectedItemForSell = ref<Item | null>(null);
-const selectedVarientIdForSell = ref<string>('');
 const sellQuantity = ref<number | null>(1);
 const sellErrorMessage = ref<string>('');
 const sellSuccessMessage = ref<string>('');
@@ -35,20 +34,10 @@ onMounted(async () => {
 });
 
 const targetInventoryItem = computed(() => {
-    if (!selectedItemForSell.value || !selectedVarientIdForSell.value) return null;
+    if (!selectedItemForSell.value) return null;
     return inventory.value.find(inv =>
-        inv.item.id === selectedItemForSell.value?.id &&
-        inv.varient.id === selectedVarientIdForSell.value
+        inv.item.id === selectedItemForSell.value?.id
     ) || null;
-});
-
-watch(selectedItemForSell, (newItem) => {
-    sellErrorMessage.value = '';
-    if (newItem && newItem.varient && newItem.varient.length > 0) {
-        selectedVarientIdForSell.value = newItem.varient[0].id;
-    } else {
-        selectedVarientIdForSell.value = '';
-    }
 });
 
 const filteredInventory = computed(() => {
@@ -56,7 +45,7 @@ const filteredInventory = computed(() => {
     const q = searchQuery.value.toLowerCase().trim();
     return inventory.value.filter(inv =>
         inv.item.name.toLowerCase().includes(q) ||
-        inv.varient.name.toLowerCase().includes(q)
+        inv.item.unit.toLowerCase().includes(q)
     );
 });
 
@@ -73,19 +62,14 @@ const openSellModal = (inv?: Inventory) => {
         const foundItem = items.value.find(i => i.id === inv.item.id);
         if (foundItem) {
             selectedItemForSell.value = foundItem;
-            selectedVarientIdForSell.value = inv.varient.id;
         }
     } else if (selectedInventoryItem.value) {
         const foundItem = items.value.find(i => i.id === selectedInventoryItem.value?.item.id);
         if (foundItem) {
             selectedItemForSell.value = foundItem;
-            selectedVarientIdForSell.value = selectedInventoryItem.value.varient.id;
         }
     } else if (items.value.length > 0) {
         selectedItemForSell.value = items.value[0];
-        if (items.value[0].varient?.length > 0) {
-            selectedVarientIdForSell.value = items.value[0].varient[0].id;
-        }
     }
 };
 
@@ -93,12 +77,12 @@ const handleSellSubmit = async () => {
     sellErrorMessage.value = '';
     sellSuccessMessage.value = '';
 
-    if (!selectedItemForSell.value || !selectedVarientIdForSell.value) {
-        sellErrorMessage.value = t('inventory.err_select_item_variant');
+    if (!selectedItemForSell.value) {
+        sellErrorMessage.value = t('inventory.err_select_item');
         return;
     }
     if (!targetInventoryItem.value) {
-        sellErrorMessage.value = t('inventory.err_variant_not_found');
+        sellErrorMessage.value = t('inventory.err_item_not_found');
         return;
     }
     if (!sellQuantity.value || sellQuantity.value <= 0) {
@@ -122,6 +106,13 @@ const handleSellSubmit = async () => {
     targetInv.quantity -= qty;
     if (targetInv.quantity === 0) targetInv.runOutDate = new Date();
     await db.inventory.put(toRawPlain(targetInv));
+    // await db.changes.add(toRawPlain({
+    //     happenedAt: new Date(),
+    //     data: targetInv,
+    //     entity: 'inventory',
+    //     action: 'update',
+    //     isSynced: false
+    // }));
 
     const saleLog: Shop = {
         id: Date.now().toString(),
@@ -135,11 +126,17 @@ const handleSellSubmit = async () => {
         dateSold: new Date()
     };
     await db.sales.add(toRawPlain(saleLog));
+    // await db.changes.add(toRawPlain({
+    //     happenedAt: new Date(),
+    //     data: saleLog,
+    //     entity: 'sales',
+    //     action: 'create',
+    //     isSynced: false
+    // }));
 
     sellSuccessMessage.value = t('shop.sell_success', {
         qty,
         item: targetInv.item.name,
-        variant: targetInv.varient.name,
         total: totalRev
     });
     sellQuantity.value = 1;
@@ -166,13 +163,13 @@ const hideModal = (modalId: string) => {
         <div class="p-4">
             <label for="input-group-1" class="sr-only">{{ t('common.search') }}</label>
             <div class="relative">
-                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                <div class="absolute inset-y-0 inset-s-0 flex items-center ps-3 pointer-events-none">
                     <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
                     </svg>
                 </div>
                 <input type="text" id="input-group-1" v-model="searchQuery"
-                    class="block max-w-96 ps-9 pe-3 py-2 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-3 py-2.5 shadow-xs placeholder:text-body"
+                    class="block max-w-96 ps-9 pe-3 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-3 py-2.5 shadow-xs placeholder:text-body"
                     :placeholder="t('shop.search_placeholder')">
             </div>
         </div>
@@ -219,7 +216,7 @@ const hideModal = (modalId: string) => {
                     </div>
                     <form @submit.prevent="handleSellSubmit">
                         <div class="grid gap-4 grid-cols-2 py-4 md:py-6">
-                            <div class="col-span-2 sm:col-span-1">
+                            <div class="col-span-2">
                                 <label for="sell-item-select" class="block mb-2.5 text-sm font-medium text-heading">{{ t('shop.select_item') }}</label>
                                 <select id="sell-item-select" v-model="selectedItemForSell"
                                     class="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs" required>
@@ -227,14 +224,7 @@ const hideModal = (modalId: string) => {
                                     <option v-for="item in items" :key="item.id" :value="item">{{ item.name }}</option>
                                 </select>
                             </div>
-                            <div class="col-span-2 sm:col-span-1">
-                                <label for="sell-varient-select" class="block mb-2.5 text-sm font-medium text-heading">{{ t('shop.select_variant') }}</label>
-                                <select id="sell-varient-select" v-model="selectedVarientIdForSell" :disabled="!selectedItemForSell"
-                                    class="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs disabled:opacity-50 disabled:cursor-not-allowed" required>
-                                    <option value="" disabled selected>{{ t('shop.select_variant_placeholder') }}</option>
-                                    <option v-for="varient in selectedItemForSell?.varient" :key="varient.id" :value="varient.id">{{ varient.name }}</option>
-                                </select>
-                            </div>
+                            
                             <div class="col-span-2 bg-neutral-secondary-medium border border-default p-3 rounded-base text-xs space-y-1">
                                 <div class="flex justify-between">
                                     <span class="text-body font-medium">{{ t('shop.available_stock') }}</span>
@@ -291,7 +281,7 @@ const hideModal = (modalId: string) => {
                             </div>
                         </th>
                         <th scope="col" class="px-6 py-3 font-medium">{{ t('shop.col_name') }}</th>
-                        <th scope="col" class="px-6 py-3 font-medium">{{ t('shop.col_variant') }}</th>
+                        <th scope="col" class="px-6 py-3 font-medium">{{ t('shop.col_unit') }}</th>
                         <th scope="col" class="px-6 py-3 font-medium">{{ t('shop.col_stock') }}</th>
                         <th scope="col" class="px-6 py-3 font-medium">{{ t('shop.col_price') }}</th>
                         <th scope="col" class="px-6 py-3 font-medium text-right"><span class="sr-only">{{ t('common.actions') }}</span></th>
@@ -312,7 +302,7 @@ const hideModal = (modalId: string) => {
                             </div>
                         </td>
                         <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">{{ inventoryItem.item.name }}</th>
-                        <td class="px-6 py-4">{{ inventoryItem.varient.name }}</td>
+                        <td class="px-6 py-4">{{ inventoryItem.item.unit }}</td>
                         <td class="px-6 py-4 font-semibold" :class="{ 'text-danger': inventoryItem.quantity <= inventoryItem.runOutThreshhold }">{{ inventoryItem.quantity }}</td>
                         <td class="px-6 py-4 font-medium text-heading">{{ inventoryItem.sellingPrice || 0 }} {{ t('common.br') }}</td>
                         <td class="px-6 py-4 text-right" @click.stop>

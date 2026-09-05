@@ -34,7 +34,7 @@ const filteredLowStock = computed(() => {
     const q = searchQuery.value.toLowerCase().trim();
     return lowStockItems.value.filter(inv =>
         inv.item.name.toLowerCase().includes(q) ||
-        inv.varient.name.toLowerCase().includes(q)
+        inv.item.unit.toLowerCase().includes(q)
     );
 });
 
@@ -153,9 +153,9 @@ const hideModal = (modalId: string) => {
                                 </select>
                             </div>
                             <div class="col-span-2 sm:col-span-1">
-                                <label class="block mb-2.5 text-sm font-medium text-heading">{{ t('inventory.variant_label') }}</label>
+                                <label class="block mb-2.5 text-sm font-medium text-heading">{{ t('inventory.unit_label') }}</label>
                                 <select disabled class="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base shadow-xs disabled:opacity-60 disabled:cursor-not-allowed">
-                                    <option selected>{{ restockItem?.varient.name }}</option>
+                                    <option selected>{{ restockItem?.item.name }}</option>
                                 </select>
                             </div>
                             <div class="col-span-2">
@@ -199,7 +199,7 @@ const hideModal = (modalId: string) => {
                 <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
                     <tr>
                         <th scope="col" class="px-6 py-3 font-medium">{{ t('low_stock.col_name') }}</th>
-                        <th scope="col" class="px-6 py-3 font-medium">{{ t('low_stock.col_variant') }}</th>
+                        <th scope="col" class="px-6 py-3 font-medium">{{ t('low_stock.col_unit') }}</th>
                         <th scope="col" class="px-6 py-3 font-medium">{{ t('low_stock.col_current_stock') }}</th>
                         <th scope="col" class="px-6 py-3 font-medium">{{ t('low_stock.col_threshold') }}</th>
                         <th scope="col" class="px-6 py-3 font-medium">{{ t('low_stock.col_status') }}</th>
@@ -210,7 +210,7 @@ const hideModal = (modalId: string) => {
                     <tr v-for="inventoryItem in filteredLowStock" :key="inventoryItem.id"
                         class="bg-danger-softer/20 border-b border-default hover:bg-danger-softer/40 cursor-pointer">
                         <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">{{ inventoryItem.item.name }}</th>
-                        <td class="px-6 py-4">{{ inventoryItem.varient.name }}</td>
+                        <td class="px-6 py-4">{{ inventoryItem.item.unit }}</td>
                         <td class="px-6 py-4 font-bold text-danger-strong">{{ inventoryItem.quantity }}</td>
                         <td class="px-6 py-4 text-body font-medium">{{ inventoryItem.runOutThreshhold }}</td>
                         <td class="px-6 py-4">

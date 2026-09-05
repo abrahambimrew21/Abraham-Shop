@@ -53,11 +53,6 @@ const allRoutes: RouteRecordRaw[] = [
                 component: () => import('@/pages/setting/ShopItems.vue')
             },
             {
-                name: 'ShopItemVarients',
-                path: '/setting/shop-items/:id/varients',
-                component: () => import('@/pages/setting/ShopItemVarients.vue')
-            },
-            {
                 name: 'Users',
                 path: '/setting/users',
                 component: () => import('@/pages/setting/Users.vue')

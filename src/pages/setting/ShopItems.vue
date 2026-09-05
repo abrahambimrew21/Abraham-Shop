@@ -11,6 +11,9 @@ const items = ref<Item[]>([]);
 const selectedItem = ref<Item | null>(null);
 const searchQuery = ref('');
 const newItemName = ref('');
+const newItemUnit = ref('');
+const editItemName = ref('');
+const editItemUnit = ref('');
 
 const loadItems = async () => {
     await seedDatabase();
@@ -34,16 +37,68 @@ const toggleSelectItem = (item: Item) => {
 };
 
 const handleAddItem = async () => {
-    if (!newItemName.value.trim()) return;
+    if (!newItemName.value.trim() || !newItemUnit.value.trim()) return;
     const newItem: Item = {
         id: Date.now().toString(),
         name: newItemName.value.trim(),
-        varient: []
+        unit: newItemUnit.value.trim()
     };
     await db.items.add(toRawPlain(newItem));
     newItemName.value = '';
+    newItemUnit.value = '';
     await loadItems();
-    hideModal('add-shop-item-modal');
+    hideModal('add-item-modal');
+};
+
+const openEditModal = (e: MouseEvent) => {
+    if (!selectedItem.value) {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        return;
+    }
+
+    editItemName.value = selectedItem.value.name;
+    editItemUnit.value = selectedItem.value.unit;
+};
+
+const handleUpdateItem = async () => {
+    if (!selectedItem.value || !editItemName.value.trim() || !editItemUnit.value.trim()) return;
+
+    const updatedItem: Item = {
+        ...selectedItem.value,
+        name: editItemName.value.trim(),
+        unit: editItemUnit.value.trim()
+    };
+
+    await db.items.put(toRawPlain(updatedItem));
+
+    const inventory = await db.inventory.toArray();
+    await Promise.all(inventory
+        .filter(record => record.item.id === updatedItem.id)
+        .map(record => db.inventory.put(toRawPlain({ ...record, item: updatedItem }))));
+
+    const restockHistory = await db.restockHistory.toArray();
+    await Promise.all(restockHistory
+        .filter(record => record.inventory.item.id === updatedItem.id)
+        .map(record => db.restockHistory.put(toRawPlain({
+            ...record,
+            inventory: { ...record.inventory, item: updatedItem }
+        }))));
+
+    const sales = await db.sales.toArray();
+    await Promise.all(sales
+        .filter(record => record.inventory.item.id === updatedItem.id)
+        .map(record => db.sales.put(toRawPlain({
+            ...record,
+            inventory: { ...record.inventory, item: updatedItem }
+        }))));
+
+    selectedItem.value = updatedItem;
+    editItemName.value = '';
+    editItemUnit.value = '';
+    await loadItems();
+    hideModal('edit-item-modal');
 };
 
 const hideModal = (modalId: string) => {
@@ -99,7 +154,11 @@ const handleDeleteItem = async () => {
                 {{ t('common.add') }}
                 <div class="tooltip-arrow" data-popper-arrow></div>
             </div>
-            <button data-tooltip-target="tooltip-update" class="inline-flex items-center justify-center px-5 hover:bg-neutral-secondary-medium group">
+            <button data-tooltip-target="tooltip-update"
+                data-modal-target="edit-item-modal" data-modal-toggle="edit-item-modal"
+                @click.capture="openEditModal"
+                :class="{ 'opacity-50 cursor-not-allowed': !selectedItem }"
+                class="inline-flex items-center justify-center px-5 hover:bg-neutral-secondary-medium group">
                 <v-icon name="md-edit-round" scale="1" class="w-6 h-6 mb-1 text-body group-hover:text-fg-brand" />
                 <span class="sr-only">{{ t('common.update') }}</span>
             </button>
@@ -118,6 +177,49 @@ const handleDeleteItem = async () => {
             <div id="tooltip-delete" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-dark rounded-base shadow-xs opacity-0 tooltip">
                 {{ t('common.delete') }}
                 <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+        </div>
+
+        <!-- Edit Item Modal -->
+        <div id="edit-item-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            <div class="relative p-4 w-full max-w-md max-h-full">
+                <div class="relative bg-neutral-primary-soft border border-default rounded-base shadow-sm p-4 md:p-6">
+                    <div class="flex items-center justify-between border-b border-default pb-4 md:pb-5">
+                        <h3 class="text-lg font-medium text-heading">{{ t('shop_items.edit_modal_title') }}</h3>
+                        <button type="button" class="text-body bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-base text-sm w-9 h-9 ms-auto inline-flex justify-center items-center" data-modal-hide="edit-item-modal">
+                            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
+                            </svg>
+                            <span class="sr-only">{{ t('common.close') }}</span>
+                        </button>
+                    </div>
+                    <form @submit.prevent="handleUpdateItem">
+                        <div class="grid gap-4 grid-cols-2 py-4 md:py-6">
+                            <div class="col-span-2">
+                                <label for="edit-item-name" class="block mb-2.5 text-sm font-medium text-heading">{{ t('shop_items.item_name_label') }}</label>
+                                <input type="text" id="edit-item-name" v-model="editItemName"
+                                    class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
+                                    :placeholder="t('shop_items.item_name_placeholder')" required>
+                            </div>
+                            <div class="col-span-2">
+                                <label for="edit-item-unit" class="block mb-2.5 text-sm font-medium text-heading">{{ t('shop_items.item_unit_label') }}</label>
+                                <input type="text" id="edit-item-unit" v-model="editItemUnit"
+                                    class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
+                                    :placeholder="t('shop_items.item_unit_placeholder')" required>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4 border-t border-default pt-4 md:pt-6">
+                            <button type="submit" data-modal-hide="edit-item-modal"
+                                class="inline-flex items-center text-white bg-brand hover:bg-brand-strong box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none">
+                                {{ t('shop_items.save_changes_btn') }}
+                            </button>
+                            <button data-modal-hide="edit-item-modal" type="button"
+                                class="text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none">
+                                {{ t('common.cancel') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -172,6 +274,12 @@ const handleDeleteItem = async () => {
                                     class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
                                     :placeholder="t('shop_items.item_name_placeholder')" required>
                             </div>
+                                    <div class="col-span-2">
+                                    <label for="item-unit" class="block mb-2.5 text-sm font-medium text-heading">{{ t('shop_items.item_unit_label') }}</label>
+                                    <input type="text" name="item-unit" id="item-unit" v-model="newItemUnit"
+                                        class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
+                                        :placeholder="t('shop_items.item_unit_placeholder')" required>
+                                    </div>
                         </div>
                         <div class="flex items-center space-x-4 border-t border-default pt-4 md:pt-6">
                             <button type="submit" data-modal-hide="add-item-modal"
@@ -203,7 +311,7 @@ const handleDeleteItem = async () => {
                             </div>
                         </th>
                         <th scope="col" class="px-6 py-3 font-medium">{{ t('common.name') }}</th>
-                        <th scope="col" class="px-6 py-3 font-medium text-right"><span class="sr-only">{{ t('common.actions') }}</span></th>
+                        <th scope="col" class="px-6 py-3 font-medium">{{ t('common.units') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -221,10 +329,8 @@ const handleDeleteItem = async () => {
                             </div>
                         </td>
                         <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">{{ item.name }}</th>
-                        <td class="px-6 py-4 text-right" @click.stop>
-                            <router-link :to="`/setting/shop-items/${item.id}/varients`" class="font-medium text-fg-brand hover:underline me-3">
-                                {{ t('shop_items.variants_link') }}
-                            </router-link>
+                        <td class="px-6 py-4" @click.stop>
+                            <span class="text-body">{{ item.unit }}</span>
                         </td>
                     </tr>
                     <tr v-if="filteredItems.length === 0">

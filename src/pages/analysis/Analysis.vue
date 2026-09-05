@@ -1,9 +1,11 @@
 <script lang="ts" setup>
+import KenatDateSelector from '@/components/KenatDateSelector.vue';
+import { db, seedDatabase } from '@/database';
+import { formatEthDate } from '@/libs/formatEthDate';
+import type { Restock } from '@/types/inventory.type';
+import type { Shop } from '@/types/shop.type';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { db, seedDatabase } from '@/database';
-import type { Shop } from '@/types/shop.type';
-import type { Restock } from '@/types/inventory.type';
 
 const { t } = useI18n();
 
@@ -189,13 +191,15 @@ onMounted(async () => {
             <div class="flex flex-wrap items-center gap-2 ms-auto">
                 <div class="flex items-center gap-2">
                     <label class="text-xs font-medium text-body whitespace-nowrap">{{ t('analysis.date_from') }}</label>
-                    <input type="date" v-model="dateFrom"
-                        class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-2.5 py-1.5 shadow-xs" />
+                    <kenat-date-selector key="332" v-on:selected-date="(dateFromHere: Date) => {console.log('From here:', dateFromHere); dateFrom = fmt(dateFromHere)}"/>
+                    <!-- <input type="date" v-model="dateFrom"
+                        class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-2.5 py-1.5 shadow-xs" /> -->
                 </div>
                 <div class="flex items-center gap-2">
                     <label class="text-xs font-medium text-body whitespace-nowrap">{{ t('analysis.date_to') }}</label>
-                    <input type="date" v-model="dateTo"
-                        class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-2.5 py-1.5 shadow-xs" />
+                    <kenat-date-selector key="331" v-on:selected-date="(dateToHere: Date) => {console.log('To here:', dateToHere); dateTo = fmt(dateToHere)}"/>
+                    <!-- <input type="date" v-model="dateTo"
+                        class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-2.5 py-1.5 shadow-xs" /> -->
                 </div>
             </div>
         </div>
@@ -303,6 +307,37 @@ onMounted(async () => {
             <div v-if="filteredRestock.length === 0" class="text-center py-2 text-xs text-body">
                 {{ t('analysis.no_restock') }}
             </div>
+        </div>
+
+        <!-- Table Full Data -->
+        <div class="relative w-full max-w-full overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default">
+            <table class="w-full text-sm text-left rtl:text-right text-body">
+                <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 font-medium">{{ t('sold_items.col_item_name') }}</th>
+                        <th scope="col" class="px-6 py-3 font-medium">{{ t('sold_items.col_unit') }}</th>
+                        <th scope="col" class="px-6 py-3 font-medium">{{ t('sold_items.col_qty_sold') }}</th>
+                        <th scope="col" class="px-6 py-3 font-medium">{{ t('sold_items.col_unit_price') }}</th>
+                        <th scope="col" class="px-6 py-3 font-medium">{{ t('sold_items.col_total_revenue') }}</th>
+                        <th scope="col" class="px-6 py-3 font-medium">{{ t('sold_items.col_margin') }}</th>
+                        <th scope="col" class="px-6 py-3 font-medium">{{ t('sold_items.col_time_sold') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="sale in filteredSales" :key="sale.id" class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                        <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">{{ sale.inventory.item.name }}</th>
+                        <td class="px-6 py-4">{{ sale.inventory.item.unit }}</td>
+                        <td class="px-6 py-4 font-semibold">{{ sale.quantity }}</td>
+                        <td class="px-6 py-4">{{ sale.sellingPrice }} {{ t('common.br') }}</td>
+                        <td class="px-6 py-4 font-bold text-heading">{{ sale.totalRevenue }} {{ t('common.br') }}</td>
+                        <td class="px-6 py-4 font-medium text-fg-success">+{{ sale.margin }} {{ t('common.br') }}</td>
+                        <td class="px-6 py-4 text-xs text-body">{{ formatEthDate(sale.dateSold) }}</td>
+                    </tr>
+                    <tr v-if="filteredSales.length === 0">
+                        <td colspan="7" class="px-6 py-8 text-center text-body">{{ t('sold_items.no_records_recent') }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
     </div>

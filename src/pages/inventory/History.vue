@@ -36,7 +36,7 @@ const filteredHistory = computed(() => {
         const q = searchQuery.value.toLowerCase().trim();
         logs = logs.filter(r =>
             r.inventory?.item?.name?.toLowerCase().includes(q) ||
-            r.inventory?.varient?.name?.toLowerCase().includes(q)
+            r.inventory?.item?.unit?.toLowerCase().includes(q)
         );
     }
     return logs.sort((a, b) => new Date(b.restockDate).getTime() - new Date(a.restockDate).getTime());
@@ -58,7 +58,7 @@ const formatDate = (dateInput: Date | string) => {
             </router-link>
             <h2 class="text-xl font-medium text-primary-900 dark:text-primary-500">
                 {{ targetInventory
-                    ? t('history.title_specific', { item: targetInventory.item.name, variant: targetInventory.varient.name })
+                    ? t('history.title_specific', { item: targetInventory.item.name })
                     : t('history.title_all') }}
             </h2>
         </div>
@@ -89,13 +89,13 @@ const formatDate = (dateInput: Date | string) => {
                         {{ formatDate(log.restockDate) }}
                     </time>
                     <h3 class="flex items-center mb-1 text-lg font-semibold text-heading my-2">
-                        {{ t('history.restocked_label', { item: log.inventory.item.name, variant: log.inventory.varient.name }) }}
+                        {{ t('history.restocked_label', { item: log.inventory.item.name }) }}
                         <span class="ms-2 bg-brand-softer border border-brand-subtle text-fg-brand-strong text-xs font-medium px-1.5 py-0.5 rounded">
-                            +{{ log.quantity }} {{ log.inventory.varient.unit }}
+                            +{{ log.quantity }} {{ log.inventory.item.unit }}
                         </span>
                     </h3>
                     <div class="mb-4 text-sm text-body space-y-1">
-                        <p>{{ t('history.qty_restocked', { qty: log.quantity, unit: log.inventory.varient.unit }) }}</p>
+                        <p>{{ t('history.qty_restocked', { qty: log.quantity, unit: log.inventory.item.unit }) }}</p>
                         <div class="flex items-center gap-4 text-xs font-medium">
                             <span class="text-heading">{{ t('history.cost_price') }} <span class="font-normal">{{ log.acquiredPrice || 0 }} {{ t('common.etb') }}/{{ t('common.units') }}</span></span>
                             <span class="text-heading">{{ t('history.selling_price') }} <span class="font-normal">{{ log.sellingPrice || 0 }} {{ t('common.etb') }}/{{ t('common.units') }}</span></span>

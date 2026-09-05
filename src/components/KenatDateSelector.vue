@@ -2,10 +2,12 @@
 import { useDatePicker, type CalendarMode } from '@/libs/KenatDatePicker';
 import { initDropdowns, initTooltips } from 'flowbite';
 import Kenat from 'kenat';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, useId, watch } from 'vue';
 
 const emit = defineEmits(['selectedDate', 'selectedDateEthiopian']);
 const calendarMode = ref<CalendarMode>("month");
+const dropdownId = `kenat-date-dropdown-${useId()}`;
+const triggerId = `${dropdownId}-trigger`;
 
 const picker = useDatePicker();
 const yearlyCalendar = Kenat.getYearCalendar(picker.state.selectedDate.value.year);
@@ -41,16 +43,16 @@ onMounted(() => {
 
     <div class="flex">
 
-        <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown"
+            <button :id="triggerId" :data-dropdown-toggle="dropdownId"
             class="block max-w-96 pe-3 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand px-3 py-2.5 shadow-xs placeholder:text-body cursor-pointer"
             type="button">
             {{ picker.state.formatted }}
         </button>
 
         <!-- Dropdown menu -->
-        <div id="dropdown"
+        <div :id="dropdownId"
             class="z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg">
-            <div class="p-2 text-sm text-body font-medium" aria-labelledby="dropdownDefaultButton">
+            <div class="p-2 text-sm text-body font-medium" :aria-labelledby="triggerId">
 
                 <div class="datepicker-header">
                     <div class="datepicker-controls flex justify-between mb-2">

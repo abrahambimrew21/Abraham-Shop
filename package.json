@@ -19,6 +19,7 @@
     "@pinia/colada": "^1.4.2",
     "@tailwindcss/vite": "^4.3.3",
     "dexie": "^4.4.5",
+    "firebase": "^12.18.0",
     "flowbite": "^4.0.2",
     "kenat": "^4.0.0",
     "oh-vue-icons": "1.0.0-rc3",

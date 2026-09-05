@@ -1,9 +1,8 @@
-import type { Item, ItemVarient } from "./items.type";
+import type { Item } from "./items.type";
 
 export interface Inventory {
     id: string;
-    item: Omit<Item, 'varient'>;
-    varient: ItemVarient;
+    item: Item;
     quantity: number;
     acquiredPrice: number;
     sellingPrice: number;
