@@ -24,6 +24,8 @@ import {
     MdShoppingcartRound,
     MdReceiptlongRound,
     MdAnalyticsRound,
+    MdLockopenRound,
+    MdLockRound
 } from "oh-vue-icons/icons";
 
 addIcons(
@@ -42,6 +44,8 @@ addIcons(
     MdShoppingcartRound,
     MdReceiptlongRound,
     MdAnalyticsRound,
+    MdLockopenRound,
+    MdLockRound
 );
 
 const pinia = createPinia()

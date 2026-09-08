@@ -72,6 +72,8 @@
         "selling_price_label": "Selling Price:",
         "selling_price_unit": "Br/unit",
         "quantity_to_sell": "Quantity to Sell",
+        "sell_discount_increment": "Total Discount/Increment",
+        "sell_discount_increment_placeholder": "eg፡ -20 discount",
         "quantity_placeholder": "Enter quantity",
         "total_amount": "Total Amount:",
         "confirm_sale": "Confirm Sale",

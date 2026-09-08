@@ -66,11 +66,18 @@ const handleRestockSubmit = async () => {
     const acquiredP = Number(restockAcquiredPrice.value);
     const sellingP = Number(restockSellingPrice.value);
 
-    restockItem.value.quantity += Number(restockQuantity.value);
+    const nextQuantity = restockItem.value.quantity + Number(restockQuantity.value);
+    const nextStockedDate = new Date();
+    await db.inventory.update(restockItem.value.id, {
+        quantity: nextQuantity,
+        acquiredPrice: acquiredP,
+        sellingPrice: sellingP,
+        stockedDate: nextStockedDate,
+    });
+    restockItem.value.quantity = nextQuantity;
     restockItem.value.acquiredPrice = acquiredP;
     restockItem.value.sellingPrice = sellingP;
-    restockItem.value.stockedDate = new Date();
-    await db.inventory.put(toRawPlain(restockItem.value));
+    restockItem.value.stockedDate = nextStockedDate;
 
     const restockLog: Restock = {
         id: Date.now().toString(),

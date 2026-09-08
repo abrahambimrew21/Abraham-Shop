@@ -76,7 +76,7 @@ const handleUpdateItem = async () => {
     const inventory = await db.inventory.toArray();
     await Promise.all(inventory
         .filter(record => record.item.id === updatedItem.id)
-        .map(record => db.inventory.put(toRawPlain({ ...record, item: updatedItem }))));
+        .map(record => db.inventory.update(record.id, { item: updatedItem })));
 
     const restockHistory = await db.restockHistory.toArray();
     await Promise.all(restockHistory

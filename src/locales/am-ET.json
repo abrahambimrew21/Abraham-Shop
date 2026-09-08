@@ -72,6 +72,8 @@
         "selling_price_label": "የሽያጭ ዋጋ፡",
         "selling_price_unit": "ብር/ክፍል",
         "quantity_to_sell": "የሚሸጥ መጠን",
+        "sell_discount_increment": "ጠቅላላ ቅናሽ/ጭማሬ",
+        "sell_discount_increment_placeholder": "ምሳሌ፡ -20 ቅናሽ",
         "quantity_placeholder": "መጠን ያስገቡ",
         "total_amount": "ጠቅላላ ዋጋ፡",
         "confirm_sale": "ሽያጭ አረጋግጥ",
