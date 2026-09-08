@@ -290,7 +290,7 @@ const hideModal = (modalId: string) => {
                                     <div class="relative">
                                         <button
                                             type="button"
-                                            class="absolute inset-y-0 inset-e-0 flex items-center pe-6 cursor-pointer focus:ring-0!"
+                                            class="absolute inset-y-0 inset-e-0 flex items-center pe-3 cursor-pointer focus:ring-0!"
                                             @click="handleDiscountLock">
                                             <v-icon v-if="discountInputLock" name="md-lock-round"  class="w-4 h-4 text-body" />
                                             <v-icon v-else name="md-lockopen-round"  class="w-4 h-4 text-body" />
@@ -299,7 +299,7 @@ const hideModal = (modalId: string) => {
                                             :disabled="discountInputLock"
                                             :min="(-1 * (sellQuantity || 0) * (targetInventoryItem?.sellingPrice || 0)) || -9999"
                                             :max="9999" id="sell-discount-increment" v-model="sellDiscount"
-                                            class="block max-w-96 pe-9 ps-3 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-3 py-2.5 shadow-xs placeholder:text-body [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            class="block max-w-96 pe-9 ps-3 w-full bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-3 py-2.5 shadow-xs placeholder:text-body [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                             :placeholder="t('shop.sell_discount_increment_placeholder')" required>
                                     </div>
                                 </div>
